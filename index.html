@@ -5,317 +5,178 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Londra Gezi Haritam</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface2: #222222;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.15);
-  --text: #f0ede8;
+  --bg: #f5f5f0;
+  --surface: #ffffff;
+  --surface2: #f8f8f5;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --text: #1a1a1a;
   --muted: #888;
-  --accent: #c8a96e;
-  --accent2: #e8c98e;
-  --danger: #e05555;
+  --accent: #2563eb;
+  --accent-bg: #eff6ff;
+  --accent-border: #bfdbfe;
+  --danger: #dc2626;
+  --success: #16a34a;
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --radius: 10px;
-  --sidebar: 320px;
+  --sidebar: 330px;
 }
 html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
 #layout { display: flex; height: 100vh; }
 
-/* SIDEBAR */
 #sidebar {
-  width: var(--sidebar);
-  min-width: var(--sidebar);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-  position: relative;
+  width: var(--sidebar); min-width: var(--sidebar);
+  background: var(--surface); border-right: 1px solid var(--border2);
+  display: flex; flex-direction: column; z-index: 100;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
 }
-#header {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-#header h1 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: -0.3px;
-}
-#header p {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 3px;
-}
+#header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+#header h1 { font-size: 17px; font-weight: 600; color: var(--accent); letter-spacing: -0.3px; }
+#header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-/* TABS */
-#tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-}
+#tabs { display: flex; border-bottom: 1px solid var(--border); }
 .tab {
-  flex: 1;
-  padding: 11px 0;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
-  font-family: var(--font);
-  background: none;
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  flex: 1; padding: 10px 0; font-size: 12px; font-weight: 500;
+  text-align: center; color: var(--muted); cursor: pointer;
+  border: none; border-bottom: 2px solid transparent;
+  background: none; font-family: var(--font); transition: all 0.15s;
 }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab:hover { color: var(--text); }
+.tab:hover { color: var(--text); background: var(--surface2); }
 
-/* PIN LIST */
-#pin-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
-}
+#pin-list { flex: 1; overflow-y: auto; padding: 10px; scrollbar-width: thin; scrollbar-color: #ddd transparent; }
 #pin-list:empty::after {
   content: 'Henüz pin eklenmedi.\nHaritaya tıklayarak başla →';
-  display: block;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  padding: 32px 16px;
-  white-space: pre-line;
-  line-height: 1.7;
+  display: block; text-align: center; color: var(--muted);
+  font-size: 13px; padding: 32px 16px; white-space: pre-line; line-height: 1.7;
 }
+
 .pcard {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
-  position: relative;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 11px 13px; margin-bottom: 7px;
+  cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; position: relative;
 }
-.pcard:hover { border-color: var(--border2); transform: translateX(2px); }
-.pcard.active { border-color: var(--accent); }
-.pcard-top { display: flex; align-items: center; gap: 9px; }
+.pcard:hover { border-color: var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.pcard.active { border-color: var(--accent); background: var(--accent-bg); }
+.pcard-top { display: flex; align-items: center; gap: 8px; }
 .pdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.pname { font-size: 13px; font-weight: 500; flex: 1; color: var(--text); }
-.ptime {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--accent);
-  background: rgba(200,169,110,0.12);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.pnote { font-size: 11px; color: var(--muted); margin-top: 6px; padding-left: 19px; line-height: 1.5; }
+.pname { font-size: 13px; font-weight: 500; flex: 1; }
+.ptime { font-size: 11px; font-family: var(--mono); color: var(--accent); background: var(--accent-bg); padding: 2px 6px; border-radius: 4px; }
+.pnote { font-size: 11px; color: var(--muted); margin-top: 5px; padding-left: 18px; line-height: 1.5; }
+.pday-badge { font-size: 10px; color: var(--muted); padding-left: 18px; margin-top: 3px; }
+.pinfo-preview { font-size: 11px; color: #444; padding-left: 18px; margin-top: 6px; line-height: 1.8; border-top: 1px solid var(--border); padding-top: 6px; }
+.pgmaps { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--accent); padding-left: 18px; margin-top: 5px; text-decoration: none; }
+.pgmaps:hover { text-decoration: underline; }
 .pdel {
-  position: absolute;
-  top: 10px; right: 10px;
-  font-size: 11px;
-  color: var(--danger);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
-  background: none;
-  border: none;
-  font-family: var(--font);
-  padding: 2px 5px;
+  position: absolute; top: 9px; right: 9px; font-size: 11px; color: var(--danger);
+  cursor: pointer; opacity: 0; transition: opacity 0.15s; background: none; border: none;
+  font-family: var(--font); padding: 2px 5px;
 }
 .pcard:hover .pdel { opacity: 1; }
-.pday-badge {
-  font-size: 10px;
-  font-family: var(--mono);
-  color: var(--muted);
-  padding-left: 19px;
-  margin-top: 4px;
-}
 
-/* ADD FORM */
-#add-panel {
-  padding: 16px;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-}
-#add-panel .section-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
+#add-panel { padding: 14px; border-top: 1px solid var(--border); background: var(--surface); overflow-y: auto; display: none; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 #click-hint {
-  font-size: 12px;
-  color: var(--accent);
-  background: rgba(200,169,110,0.1);
-  border: 1px solid rgba(200,169,110,0.2);
-  border-radius: 8px;
-  padding: 9px 12px;
-  margin-bottom: 12px;
-  text-align: center;
+  font-size: 12px; color: var(--accent); background: var(--accent-bg);
+  border: 1px solid var(--accent-border); border-radius: 8px;
+  padding: 8px 12px; margin-bottom: 10px; text-align: center;
 }
-#click-hint.ready { color: #6ec88a; background: rgba(110,200,138,0.1); border-color: rgba(110,200,138,0.2); }
-.form-group { margin-bottom: 10px; }
-.form-group label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+#click-hint.ready { color: var(--success); background: #f0fdf4; border-color: #bbf7d0; }
+.form-group { margin-bottom: 9px; }
+.form-group label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 3px; }
 .form-group input, .form-group textarea, .form-group select {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
-  color: var(--text);
-  font-family: var(--font);
-  outline: none;
-  transition: border-color 0.15s;
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 7px 10px; font-size: 13px; color: var(--text);
+  font-family: var(--font); outline: none; transition: border-color 0.15s;
 }
-.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-  border-color: var(--accent);
-}
-.form-group textarea { height: 60px; resize: none; }
-.form-group select option { background: #222; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+.form-group textarea { height: 52px; resize: none; }
 .row2 { display: flex; gap: 8px; }
 .row2 .form-group { flex: 1; }
-.colors { display: flex; gap: 6px; margin-bottom: 12px; }
-.cb {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.1s, border-color 0.1s;
-}
+.colors { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.cb { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; transition: transform 0.1s; }
 .cb:hover { transform: scale(1.15); }
-.cb.sel { border-color: white; transform: scale(1.15); }
-#btn-save {
-  width: 100%;
-  padding: 10px;
-  background: var(--accent);
-  color: #1a1400;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: background 0.15s, transform 0.1s;
+.cb.sel { border-color: #1a1a1a; transform: scale(1.15); }
+
+#ai-box {
+  background: #fffbeb; border: 1px solid #fde68a;
+  border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+  font-size: 12px; line-height: 1.8; display: none;
 }
-#btn-save:hover { background: var(--accent2); }
+#ai-box .ai-row { display: flex; gap: 6px; }
+#ai-box .ai-label { color: var(--muted); min-width: 95px; font-size: 11px; flex-shrink: 0; }
+#ai-box .ai-val { color: var(--text); font-weight: 500; }
+
+#btn-ai {
+  width: 100%; padding: 8px; background: var(--surface2); color: var(--accent);
+  border: 1px solid var(--accent-border); border-radius: 8px; font-size: 12px;
+  font-weight: 500; cursor: pointer; font-family: var(--font);
+  transition: all 0.15s; margin-bottom: 8px; display: none;
+}
+#btn-ai:hover { background: var(--accent-bg); }
+
+#btn-save {
+  width: 100%; padding: 10px; background: var(--accent); color: white;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+#btn-save:hover { background: #1d4ed8; }
 #btn-save:active { transform: scale(0.98); }
 
-/* SHARE PANEL */
 #share-panel { padding: 16px; display: none; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; }
-#share-panel.visible { display: flex; }
-.share-url-box {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 12px;
-}
+.share-url-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 12px; }
 .share-url-box p { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-.url-text {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--accent);
-  word-break: break-all;
-  line-height: 1.5;
-  max-height: 80px;
-  overflow: auto;
-}
-#btn-copy {
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid rgba(200,169,110,0.3);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all 0.15s;
-  margin-top: 8px;
-}
-#btn-copy:hover { background: rgba(200,169,110,0.1); }
-#btn-copy.copied { color: #6ec88a; border-color: rgba(110,200,138,0.3); }
+.url-text { font-family: var(--mono); font-size: 10px; color: var(--accent); word-break: break-all; line-height: 1.5; max-height: 70px; overflow: auto; }
+#btn-copy { width: 100%; padding: 9px; background: transparent; color: var(--accent); border: 1px solid var(--accent-border); border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font); transition: all 0.15s; margin-top: 8px; }
+#btn-copy:hover { background: var(--accent-bg); }
+#btn-copy.copied { color: var(--success); border-color: #bbf7d0; }
 .share-info { font-size: 12px; color: var(--muted); line-height: 1.6; }
 .share-info strong { color: var(--text); }
-.pin-summary {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-}
-.pin-summary h3 { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.pin-summary { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.pin-summary h3 { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .summary-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); }
 .summary-item:last-child { border-bottom: none; }
 .summary-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .summary-name { font-size: 12px; flex: 1; }
 .summary-time { font-size: 11px; font-family: var(--mono); color: var(--accent); }
 
-/* MAP */
 #map { flex: 1; z-index: 1; }
 #map-overlay {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(15,15,15,0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 8px 18px;
-  font-size: 12px;
-  color: var(--muted);
-  z-index: 500;
-  pointer-events: none;
-  transition: opacity 0.3s;
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+  border: 1px solid rgba(0,0,0,0.12); border-radius: 20px;
+  padding: 7px 18px; font-size: 12px; color: #555; z-index: 500;
+  pointer-events: none; transition: opacity 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 #map-overlay.hidden { opacity: 0; }
 
-/* Leaflet overrides */
-.leaflet-container { background: #1a1f1a; font-family: var(--font); }
+.leaflet-container { background: #e8e0d8; font-family: var(--font); }
 .custom-popup .leaflet-popup-content-wrapper {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  color: var(--text);
+  background: white; border: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.12); color: var(--text);
 }
-.custom-popup .leaflet-popup-tip { background: var(--surface); }
-.custom-popup .leaflet-popup-content { margin: 14px 16px; min-width: 160px; }
+.custom-popup .leaflet-popup-tip { background: white; }
+.custom-popup .leaflet-popup-content { margin: 14px 16px; min-width: 190px; }
 .popup-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-.popup-time { font-size: 12px; font-family: var(--mono); color: var(--accent); margin-bottom: 4px; }
-.popup-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.popup-time { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+.popup-note { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 6px; }
+.popup-info { font-size: 11px; line-height: 1.9; border-top: 1px solid #eee; padding-top: 6px; margin-top: 4px; }
+.popup-gmaps { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 8px; font-weight: 500; }
+.popup-gmaps:hover { text-decoration: underline; }
 
-.counter {
-  display: inline-block;
-  background: rgba(200,169,110,0.15);
-  color: var(--accent);
-  border-radius: 10px;
-  font-size: 11px;
-  font-family: var(--mono);
-  padding: 1px 7px;
-  margin-left: 6px;
-}
+.counter { display: inline-block; background: var(--accent-bg); color: var(--accent); border-radius: 10px; font-size: 11px; padding: 1px 7px; margin-left: 5px; }
 
 @media (max-width: 640px) {
   :root { --sidebar: 100vw; }
   #layout { flex-direction: column; }
-  #sidebar { height: 50vh; min-width: unset; width: 100%; }
-  #map { height: 50vh; }
+  #sidebar { height: 55vh; min-width: unset; width: 100%; }
+  #map { height: 45vh; }
 }
 </style>
 </head>
@@ -324,7 +185,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
   <div id="sidebar">
     <div id="header">
       <h1>✈ Londra Gezi Haritam</h1>
-      <p id="subtitle">25 Mayıs – 2 Haziran</p>
+      <p>25 Mayıs – 2 Haziran 2026</p>
     </div>
     <div id="tabs">
       <button class="tab active" onclick="switchTab('pins')">📍 Pinler <span class="counter" id="cnt">0</span></button>
@@ -339,8 +200,11 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
       <div id="click-hint">👆 Önce haritada bir yere tıkla</div>
       <div class="form-group">
         <label>Yer adı</label>
-        <input type="text" id="inp-name" placeholder="örn: Tower Bridge" maxlength="50"/>
+        <input type="text" id="inp-name" placeholder="örn: Tower Bridge" maxlength="60"
+          oninput="onNameInput()" onblur="onNameBlur()"/>
       </div>
+      <button id="btn-ai" onclick="fetchPlaceInfo()">✨ Bilgileri Otomatik Getir</button>
+      <div id="ai-box"></div>
       <div class="row2">
         <div class="form-group">
           <label>Saat</label>
@@ -350,15 +214,9 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
           <label>Gün</label>
           <select id="inp-day">
             <option value="">—</option>
-            <option value="25 Mayıs">25 Mayıs</option>
-            <option value="26 Mayıs">26 Mayıs</option>
-            <option value="27 Mayıs">27 Mayıs</option>
-            <option value="28 Mayıs">28 Mayıs</option>
-            <option value="29 Mayıs">29 Mayıs</option>
-            <option value="30 Mayıs">30 Mayıs</option>
-            <option value="31 Mayıs">31 Mayıs</option>
-            <option value="1 Haziran">1 Haziran</option>
-            <option value="2 Haziran">2 Haziran</option>
+            <option>25 Mayıs</option><option>26 Mayıs</option><option>27 Mayıs</option>
+            <option>28 Mayıs</option><option>29 Mayıs</option><option>30 Mayıs</option>
+            <option>31 Mayıs</option><option>1 Haziran</option><option>2 Haziran</option>
           </select>
         </div>
       </div>
@@ -390,164 +248,194 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 </div>
 
 <script>
-const COLORS = ['#E05555','#4A90D9','#27AE60','#F0A500','#9B59B6','#E67E22','#1ABC9C','#E91E8C'];
+const COLORS = ['#E05555','#2563eb','#16a34a','#d97706','#9333ea','#ea580c','#0891b2','#db2777'];
 let selColor = COLORS[0];
-let pins = [];
-let nextId = 1;
-let pendingLatLng = null;
-let activeId = null;
-let markers = {};
-let activeTab = 'pins';
+let pins = [], nextId = 1, pendingLatLng = null, activeId = null, markers = {}, currentAIInfo = null;
 
-/* ---- COLOR BUTTONS ---- */
 const colorsEl = document.getElementById('colors');
 COLORS.forEach(c => {
   const b = document.createElement('div');
   b.className = 'cb' + (c === selColor ? ' sel' : '');
   b.style.background = c;
-  b.title = c;
-  b.onclick = () => {
-    selColor = c;
-    document.querySelectorAll('.cb').forEach(x => x.classList.remove('sel'));
-    b.classList.add('sel');
-  };
+  b.onclick = () => { selColor = c; document.querySelectorAll('.cb').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
   colorsEl.appendChild(b);
 });
 
-/* ---- MAP INIT ---- */
-const map = L.map('map', {
-  center: [51.505, -0.118],
-  zoom: 13,
-  zoomControl: true
-});
-
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap contributors © CARTO',
-  maxZoom: 19
+const map = L.map('map', { center: [51.505, -0.118], zoom: 13 });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors', maxZoom: 19
 }).addTo(map);
 
 map.on('click', e => {
   pendingLatLng = e.latlng;
   const hint = document.getElementById('click-hint');
-  hint.textContent = `✅ ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)} seçildi`;
+  hint.textContent = '✅ Konum seçildi';
   hint.classList.add('ready');
   switchTab('add');
   document.getElementById('inp-name').focus();
 });
 
-/* ---- CUSTOM MARKER ---- */
-function makeIcon(color) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
-    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter>
-    <path filter="url(#s)" d="M14 1C7.1 1 1.5 6.6 1.5 13.5c0 9.8 12.5 23 12.5 23s12.5-13.2 12.5-23C26.5 6.6 20.9 1 14 1z" fill="${color}"/>
-    <circle cx="14" cy="13.5" r="5.5" fill="white" opacity="0.9"/>
-  </svg>`;
-  return L.divIcon({
-    html: svg,
-    className: '',
-    iconSize: [28, 38],
-    iconAnchor: [14, 38],
-    popupAnchor: [0, -40]
-  });
+function onNameInput() {
+  const name = document.getElementById('inp-name').value.trim();
+  document.getElementById('btn-ai').style.display = name.length > 2 ? 'block' : 'none';
+  currentAIInfo = null;
+  document.getElementById('ai-box').style.display = 'none';
 }
 
-/* ---- SAVE PIN ---- */
-function savePin() {
+function onNameBlur() {
   const name = document.getElementById('inp-name').value.trim();
-  if (!name) { document.getElementById('inp-name').focus(); return; }
-  if (!pendingLatLng) {
-    document.getElementById('click-hint').textContent = '👆 Önce haritada bir yere tıkla!';
-    document.getElementById('click-hint').classList.remove('ready');
-    return;
+  if (name.length > 2) setTimeout(fetchPlaceInfo, 400);
+}
+
+async function fetchPlaceInfo() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) return;
+  const box = document.getElementById('ai-box');
+  box.style.display = 'block';
+  box.innerHTML = '<span style="color:#888;font-style:italic">✨ Bilgiler yükleniyor...</span>';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        system: 'You are a London travel assistant. When given a place name in London, respond ONLY with a JSON object (no markdown, no extra text) with these exact keys: "hours" (opening-closing hours e.g. "09:00–18:00" or "24 saat açık"), "duration" (average visit time in Turkish e.g. "1–2 saat"), "entry" (entry fee in Turkish e.g. "Ücretsiz" or "£25–£35"), "tip" (one short practical tip in Turkish, max 12 words). Give best estimates even if unsure.',
+        messages: [{ role: 'user', content: `London place: ${name}` }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    let info;
+    try { info = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch { info = null; }
+
+    if (info) {
+      currentAIInfo = info;
+      box.innerHTML = `
+        ${info.hours ? `<div class="ai-row"><span class="ai-label">🕐 Açılış saati</span><span class="ai-val">${info.hours}</span></div>` : ''}
+        ${info.duration ? `<div class="ai-row"><span class="ai-label">⏱ Gezme süresi</span><span class="ai-val">${info.duration}</span></div>` : ''}
+        ${info.entry ? `<div class="ai-row"><span class="ai-label">🎟 Giriş ücreti</span><span class="ai-val">${info.entry}</span></div>` : ''}
+        ${info.tip ? `<div class="ai-row" style="margin-top:3px"><span class="ai-label">💡 İpucu</span><span class="ai-val" style="font-weight:400;font-size:11px">${info.tip}</span></div>` : ''}
+      `;
+    } else {
+      box.innerHTML = '<span style="color:#888">⚠️ Bilgi alınamadı, manuel girebilirsin.</span>';
+    }
+  } catch(e) {
+    box.innerHTML = '<span style="color:#888">⚠️ Bağlantı hatası.</span>';
   }
-  const pin = {
-    id: nextId++,
-    name,
-    lat: pendingLatLng.lat,
-    lng: pendingLatLng.lng,
-    time: document.getElementById('inp-time').value,
-    day: document.getElementById('inp-day').value,
-    note: document.getElementById('inp-note').value.trim(),
-    color: selColor
-  };
-  pins.push(pin);
-  addMarker(pin);
-  pendingLatLng = null;
-  document.getElementById('inp-name').value = '';
-  document.getElementById('inp-note').value = '';
-  document.getElementById('click-hint').textContent = '👆 Önce haritada bir yere tıkla';
-  document.getElementById('click-hint').classList.remove('ready');
-  saveToURL();
-  renderList();
-  switchTab('pins');
+}
+
+function makeIcon(color) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+    <path d="M14 1C7.1 1 1.5 6.6 1.5 13.5c0 9.8 12.5 23 12.5 23s12.5-13.2 12.5-23C26.5 6.6 20.9 1 14 1z" fill="${color}" stroke="white" stroke-width="1.5"/>
+    <circle cx="14" cy="13.5" r="5" fill="white" opacity="0.95"/>
+  </svg>`;
+  return L.divIcon({ html: svg, className: '', iconSize: [28,38], iconAnchor: [14,38], popupAnchor: [0,-42] });
+}
+
+function gmapsUrl(pin) {
+  return `https://www.google.com/maps/search/${encodeURIComponent(pin.name + ' London')}/@${pin.lat},${pin.lng},17z`;
 }
 
 function addMarker(pin) {
+  const infoHtml = pin.info ? `<div class="popup-info">
+    ${pin.info.hours ? `<span>🕐 ${pin.info.hours}</span>` : ''}
+    ${pin.info.duration ? `<span>⏱ ${pin.info.duration}</span>` : ''}
+    ${pin.info.entry ? `<span>🎟 ${pin.info.entry}</span>` : ''}
+  </div>` : '';
   const m = L.marker([pin.lat, pin.lng], { icon: makeIcon(pin.color) })
     .addTo(map)
     .bindPopup(`
       <div class="popup-name" style="color:${pin.color}">${pin.name}</div>
-      ${pin.day ? `<div class="popup-time">📅 ${pin.day}${pin.time ? ' · ' + pin.time : ''}</div>` : pin.time ? `<div class="popup-time">🕐 ${pin.time}</div>` : ''}
+      ${pin.day ? `<div class="popup-time">📅 ${pin.day}${pin.time ? ' · '+pin.time : ''}</div>` : pin.time ? `<div class="popup-time">🕐 ${pin.time}</div>` : ''}
       ${pin.note ? `<div class="popup-note">${pin.note}</div>` : ''}
+      ${infoHtml}
+      <a class="popup-gmaps" href="${gmapsUrl(pin)}" target="_blank">🗺 Google Maps'te Aç ↗</a>
     `, { className: 'custom-popup' });
   m.on('click', () => setActive(pin.id));
   markers[pin.id] = m;
 }
 
-/* ---- DELETE ---- */
+function savePin() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) { document.getElementById('inp-name').focus(); return; }
+  if (!pendingLatLng) {
+    const hint = document.getElementById('click-hint');
+    hint.textContent = '👆 Önce haritada bir yere tıkla!';
+    hint.classList.remove('ready');
+    return;
+  }
+  const pin = {
+    id: nextId++, name,
+    lat: pendingLatLng.lat, lng: pendingLatLng.lng,
+    time: document.getElementById('inp-time').value,
+    day: document.getElementById('inp-day').value,
+    note: document.getElementById('inp-note').value.trim(),
+    color: selColor,
+    info: currentAIInfo || null
+  };
+  pins.push(pin); addMarker(pin);
+  pendingLatLng = null; currentAIInfo = null;
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-note').value = '';
+  document.getElementById('ai-box').style.display = 'none';
+  document.getElementById('btn-ai').style.display = 'none';
+  document.getElementById('click-hint').textContent = '👆 Önce haritada bir yere tıkla';
+  document.getElementById('click-hint').classList.remove('ready');
+  saveToURL(); renderList(); switchTab('pins');
+}
+
 function deletePin(id) {
   pins = pins.filter(p => p.id !== id);
   if (markers[id]) { map.removeLayer(markers[id]); delete markers[id]; }
   if (activeId === id) activeId = null;
-  saveToURL();
-  renderList();
+  saveToURL(); renderList();
 }
 
-/* ---- ACTIVE ---- */
 function setActive(id) {
-  activeId = id;
-  renderList();
+  activeId = id; renderList();
   const pin = pins.find(p => p.id === id);
-  if (pin && markers[id]) {
-    map.setView([pin.lat, pin.lng], Math.max(map.getZoom(), 15));
-    markers[id].openPopup();
-  }
+  if (pin && markers[id]) { map.setView([pin.lat, pin.lng], Math.max(map.getZoom(), 16)); markers[id].openPopup(); }
 }
 
-/* ---- RENDER LIST ---- */
 function renderList() {
   const list = document.getElementById('pin-list');
   document.getElementById('cnt').textContent = pins.length;
-
   if (!pins.length) { list.innerHTML = ''; return; }
-
-  const sorted = [...pins].sort((a, b) => {
-    if (a.day && b.day && a.day !== b.day) return a.day.localeCompare(b.day);
+  const days = ['25 Mayıs','26 Mayıs','27 Mayıs','28 Mayıs','29 Mayıs','30 Mayıs','31 Mayıs','1 Haziran','2 Haziran'];
+  const sorted = [...pins].sort((a,b) => {
+    const da = days.indexOf(a.day), db = days.indexOf(b.day);
+    if (da !== db) return da - db;
     if (a.time && b.time) return a.time.localeCompare(b.time);
     return 0;
   });
-
   list.innerHTML = sorted.map(p => `
-    <div class="pcard ${activeId === p.id ? 'active' : ''}" onclick="setActive(${p.id})">
+    <div class="pcard ${activeId===p.id?'active':''}" onclick="setActive(${p.id})">
       <button class="pdel" onclick="event.stopPropagation();deletePin(${p.id})">✕</button>
       <div class="pcard-top">
         <div class="pdot" style="background:${p.color}"></div>
         <span class="pname">${p.name}</span>
-        ${p.time ? `<span class="ptime">${p.time}</span>` : ''}
+        ${p.time?`<span class="ptime">${p.time}</span>`:''}
       </div>
-      ${p.day ? `<div class="pday-badge">📅 ${p.day}</div>` : ''}
-      ${p.note ? `<div class="pnote">${p.note}</div>` : ''}
+      ${p.day?`<div class="pday-badge">📅 ${p.day}</div>`:''}
+      ${p.note?`<div class="pnote">${p.note}</div>`:''}
+      ${p.info?`<div class="pinfo-preview">
+        ${p.info.hours?`<span>🕐 ${p.info.hours}</span> `:''}
+        ${p.info.duration?`<span>⏱ ${p.info.duration}</span> `:''}
+        ${p.info.entry?`<span>🎟 ${p.info.entry}</span>`:''}
+      </div>`:''}
+      <a class="pgmaps" href="${gmapsUrl(p)}" target="_blank" onclick="event.stopPropagation()">🗺 Google Maps'te Aç ↗</a>
     </div>
   `).join('');
-
   updateSharePanel();
 }
 
-/* ---- SHARE / URL ---- */
 function saveToURL() {
-  const data = btoa(encodeURIComponent(JSON.stringify(pins)));
-  const url = window.location.href.split('?')[0].split('#')[0] + '#' + data;
-  history.replaceState(null, '', url);
+  try {
+    const data = btoa(encodeURIComponent(JSON.stringify(pins)));
+    history.replaceState(null, '', window.location.href.split('#')[0] + '#' + data);
+  } catch(e) {}
 }
 
 function loadFromURL() {
@@ -555,85 +443,62 @@ function loadFromURL() {
   if (!hash) return;
   try {
     const loaded = JSON.parse(decodeURIComponent(atob(hash)));
-    loaded.forEach(p => {
-      p.id = nextId++;
-      pins.push(p);
-      addMarker(p);
-    });
-    if (pins.length) {
-      const latlngs = pins.map(p => [p.lat, p.lng]);
-      map.fitBounds(latlngs, { padding: [40, 40] });
-    }
+    loaded.forEach(p => { p.id = nextId++; pins.push(p); addMarker(p); });
+    if (pins.length) map.fitBounds(pins.map(p => [p.lat,p.lng]), { padding: [40,40] });
     renderList();
-  } catch(e) { console.warn('URL parse error', e); }
+  } catch(e) {}
 }
 
 function updateSharePanel() {
-  const data = pins.length ? btoa(encodeURIComponent(JSON.stringify(pins))) : '';
-  const url = pins.length ? (window.location.href.split('#')[0] + '#' + data) : '';
+  const url = pins.length ? window.location.href.split('#')[0]+'#'+btoa(encodeURIComponent(JSON.stringify(pins))) : '';
   document.getElementById('share-url').textContent = url || 'Henüz pin eklenmedi.';
-
   const summary = document.getElementById('pin-summary');
   if (!pins.length) { summary.innerHTML = ''; return; }
-  summary.innerHTML = '<h3>Pinler (' + pins.length + ')</h3>' +
-    pins.map(p => `<div class="summary-item">
+  summary.innerHTML = '<h3>Pinler ('+pins.length+')</h3>' +
+    pins.map(p=>`<div class="summary-item">
       <div class="summary-dot" style="background:${p.color}"></div>
-      <span class="summary-name">${p.name}${p.day ? ' <small style="color:var(--muted)">'+p.day+'</small>' : ''}</span>
-      ${p.time ? `<span class="summary-time">${p.time}</span>` : ''}
+      <span class="summary-name">${p.name}${p.day?` <small style="color:var(--muted)">${p.day}</small>`:''}</span>
+      ${p.time?`<span class="summary-time">${p.time}</span>`:''}
     </div>`).join('');
 }
 
 function copyLink() {
   const url = document.getElementById('share-url').textContent;
-  if (!url || url === 'Henüz pin eklenmedi.') return;
+  if (!url || url==='Henüz pin eklenmedi.') return;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('btn-copy');
-    btn.textContent = '✅ Kopyalandı!';
-    btn.classList.add('copied');
+    btn.textContent = '✅ Kopyalandı!'; btn.classList.add('copied');
     setTimeout(() => { btn.textContent = '📋 Linki Kopyala'; btn.classList.remove('copied'); }, 2500);
   });
 }
 
-/* ---- TABS ---- */
 function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['pins','add','share'][i] === tab);
-  });
-  document.getElementById('pin-list').style.display = tab === 'pins' ? 'block' : 'none';
-  document.getElementById('add-panel').style.display = tab === 'add' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['pins','add','share'][i]===tab));
+  document.getElementById('pin-list').style.display = tab==='pins' ? 'block' : 'none';
+  document.getElementById('add-panel').style.display = tab==='add' ? 'block' : 'none';
   const sp = document.getElementById('share-panel');
-  if (tab === 'share') { sp.style.display = 'flex'; updateSharePanel(); }
-  else sp.style.display = 'none';
+  if (tab==='share') { sp.style.display='flex'; updateSharePanel(); } else sp.style.display='none';
 }
 
-/* ---- OVERLAY HINT ---- */
 let overlayTimer;
 map.on('click', () => {
   clearTimeout(overlayTimer);
-  overlayTimer = setTimeout(() => {
-    document.getElementById('map-overlay').classList.add('hidden');
-  }, 3000);
+  overlayTimer = setTimeout(() => document.getElementById('map-overlay').classList.add('hidden'), 3000);
 });
 
-/* ---- DEMO PINS ---- */
 function loadDemo() {
   const demo = [
-    { id: nextId++, name: 'Big Ben', lat: 51.5007, lng: -0.1246, time: '09:00', day: '26 Mayıs', note: 'Sabah erken git, kalabalık az olur', color: '#4A90D9' },
-    { id: nextId++, name: 'Tower Bridge', lat: 51.5055, lng: -0.0754, time: '11:30', day: '26 Mayıs', note: 'Cam zemin için bilet al', color: '#E05555' },
-    { id: nextId++, name: 'British Museum', lat: 51.5194, lng: -0.1270, time: '14:00', day: '27 Mayıs', note: 'Rosetta Taşı mutlaka görülmeli', color: '#27AE60' },
+    { id:nextId++, name:'Big Ben', lat:51.5007, lng:-0.1246, time:'09:00', day:'26 Mayıs', note:'Sabah erken git, kalabalık az olur', color:'#2563eb', info:{ hours:'09:00–18:00', duration:'30–60 dk', entry:'Ücretsiz (dış)', tip:'Westminster Köprüsü\'nden fotoğraf çekilmesi önerilir.' }},
+    { id:nextId++, name:'Tower Bridge', lat:51.5055, lng:-0.0754, time:'11:30', day:'26 Mayıs', note:'Cam zemin için bilet al', color:'#E05555', info:{ hours:'09:30–18:00', duration:'1–1.5 saat', entry:'£14.80', tip:'Cam zemin 42 metre yükseklikte.' }},
+    { id:nextId++, name:'British Museum', lat:51.5194, lng:-0.1270, time:'14:00', day:'27 Mayıs', note:'Rosetta Taşı mutlaka görülmeli', color:'#16a34a', info:{ hours:'10:00–17:00', duration:'2–3 saat', entry:'Ücretsiz', tip:'Cuma günleri 20:30\'a kadar açık.' }},
   ];
   demo.forEach(p => { pins.push(p); addMarker(p); });
-  map.fitBounds([[51.50, -0.13], [51.52, -0.07]], { padding: [40,40] });
-  saveToURL();
-  renderList();
+  map.fitBounds([[51.50,-0.13],[51.52,-0.07]], { padding:[40,40] });
+  saveToURL(); renderList();
 }
 
-/* ---- INIT ---- */
 switchTab('pins');
-const hasHash = window.location.hash.length > 1;
-if (hasHash) { loadFromURL(); }
-else { loadDemo(); }
+if (window.location.hash.length > 1) loadFromURL(); else loadDemo();
 </script>
 </body>
 </html>
