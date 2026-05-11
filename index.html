@@ -147,6 +147,27 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 .summary-time { font-size: 11px; font-family: var(--mono); color: var(--accent); }
 
 #map { flex: 1; z-index: 1; }
+#search-box {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 500; width: 320px;
+}
+#search-inp {
+  width: 100%; padding: 10px 16px; border-radius: 24px;
+  border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  font-size: 14px; font-family: var(--font); outline: none;
+  background: white; color: var(--text);
+}
+#search-results {
+  background: white; border-radius: 12px; margin-top: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15); overflow: hidden; display: none;
+}
+.search-item {
+  padding: 10px 16px; font-size: 13px; cursor: pointer;
+  border-bottom: 1px solid #f0f0f0; color: var(--text);
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background: var(--accent-bg); color: var(--accent); }
+.search-item small { display: block; font-size: 11px; color: var(--muted); margin-top: 1px; }
 #map-overlay {
   position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
   background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
@@ -185,7 +206,7 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
   <div id="sidebar">
     <div id="header">
       <h1>✈ Londra Gezi Haritam</h1>
-      <p>25 Mayıs – 2 Haziran 2026</p>
+      <p>28 Mayıs – 5 Haziran 2026</p>
     </div>
     <div id="tabs">
       <button class="tab active" onclick="switchTab('pins')">📍 Pinler <span class="counter" id="cnt">0</span></button>
@@ -214,9 +235,9 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
           <label>Gün</label>
           <select id="inp-day">
             <option value="">—</option>
-            <option>25 Mayıs</option><option>26 Mayıs</option><option>27 Mayıs</option>
             <option>28 Mayıs</option><option>29 Mayıs</option><option>30 Mayıs</option>
             <option>31 Mayıs</option><option>1 Haziran</option><option>2 Haziran</option>
+            <option>3 Haziran</option><option>4 Haziran</option><option>5 Haziran</option>
           </select>
         </div>
       </div>
@@ -243,6 +264,10 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
   </div>
 
   <div id="map" style="position:relative;">
+    <div id="search-box">
+      <input type="text" id="search-inp" placeholder="🔍 Londra'da yer ara..." onkeydown="if(event.key==='Enter')doSearch()" oninput="onSearchInput()"/>
+      <div id="search-results"></div>
+    </div>
     <div id="map-overlay">🖱 Haritaya tıklayarak pin ekle</div>
   </div>
 </div>
@@ -488,9 +513,9 @@ map.on('click', () => {
 
 function loadDemo() {
   const demo = [
-    { id:nextId++, name:'Big Ben', lat:51.5007, lng:-0.1246, time:'09:00', day:'26 Mayıs', note:'Sabah erken git, kalabalık az olur', color:'#2563eb', info:{ hours:'09:00–18:00', duration:'30–60 dk', entry:'Ücretsiz (dış)', tip:'Westminster Köprüsü\'nden fotoğraf çekilmesi önerilir.' }},
-    { id:nextId++, name:'Tower Bridge', lat:51.5055, lng:-0.0754, time:'11:30', day:'26 Mayıs', note:'Cam zemin için bilet al', color:'#E05555', info:{ hours:'09:30–18:00', duration:'1–1.5 saat', entry:'£14.80', tip:'Cam zemin 42 metre yükseklikte.' }},
-    { id:nextId++, name:'British Museum', lat:51.5194, lng:-0.1270, time:'14:00', day:'27 Mayıs', note:'Rosetta Taşı mutlaka görülmeli', color:'#16a34a', info:{ hours:'10:00–17:00', duration:'2–3 saat', entry:'Ücretsiz', tip:'Cuma günleri 20:30\'a kadar açık.' }},
+    { id:nextId++, name:'Big Ben', lat:51.5007, lng:-0.1246, time:'09:00', day:'28 Mayıs', note:'Sabah erken git, kalabalık az olur', color:'#2563eb', info:{ hours:'09:00–18:00', duration:'30–60 dk', entry:'Ücretsiz (dış)', tip:'Westminster Köprüsü\'nden fotoğraf çekilmesi önerilir.' }},
+    { id:nextId++, name:'Tower Bridge', lat:51.5055, lng:-0.0754, time:'11:30', day:'28 Mayıs', note:'Cam zemin için bilet al', color:'#E05555', info:{ hours:'09:30–18:00', duration:'1–1.5 saat', entry:'£14.80', tip:'Cam zemin 42 metre yükseklikte.' }},
+    { id:nextId++, name:'British Museum', lat:51.5194, lng:-0.1270, time:'14:00', day:'29 Mayıs', note:'Rosetta Taşı mutlaka görülmeli', color:'#16a34a', info:{ hours:'10:00–17:00', duration:'2–3 saat', entry:'Ücretsiz', tip:'Cuma günleri 20:30\'a kadar açık.' }},
   ];
   demo.forEach(p => { pins.push(p); addMarker(p); });
   map.fitBounds([[51.50,-0.13],[51.52,-0.07]], { padding:[40,40] });
@@ -499,6 +524,53 @@ function loadDemo() {
 
 switchTab('pins');
 if (window.location.hash.length > 1) loadFromURL(); else loadDemo();
+
+let searchTimer;
+let searchMarker = null;
+
+function onSearchInput() {
+  const q = document.getElementById('search-inp').value.trim();
+  clearTimeout(searchTimer);
+  if (q.length < 3) { document.getElementById('search-results').style.display='none'; return; }
+  searchTimer = setTimeout(() => doSearch(), 600);
+}
+
+async function doSearch() {
+  const q = document.getElementById('search-inp').value.trim();
+  if (!q) return;
+  const res = document.getElementById('search-results');
+  res.style.display = 'block';
+  res.innerHTML = '<div class="search-item" style="color:#888;font-style:italic">Aranıyor...</div>';
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ' London')}&format=json&limit=5&countrycodes=gb`;
+    const resp = await fetch(url, { headers: { 'Accept-Language': 'tr' } });
+    const data = await resp.json();
+    if (!data.length) { res.innerHTML = '<div class="search-item" style="color:#888">Sonuç bulunamadı</div>'; return; }
+    res.innerHTML = data.map((r,i) => `
+      <div class="search-item" onclick="goToResult(${r.lat},${r.lon},'${r.display_name.replace(/'/g,"\\'")}')">
+        ${r.display_name.split(',')[0]}
+        <small>${r.display_name.split(',').slice(1,3).join(',').trim()}</small>
+      </div>`).join('');
+  } catch(e) {
+    res.innerHTML = '<div class="search-item" style="color:#888">Bağlantı hatası</div>';
+  }
+}
+
+function goToResult(lat, lon, name) {
+  const ll = [parseFloat(lat), parseFloat(lon)];
+  map.setView(ll, 17);
+  if (searchMarker) map.removeLayer(searchMarker);
+  searchMarker = L.circleMarker(ll, { radius:10, color:'#2563eb', fillColor:'#2563eb', fillOpacity:0.3, weight:2 }).addTo(map);
+  setTimeout(() => { if(searchMarker) { map.removeLayer(searchMarker); searchMarker=null; } }, 4000);
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('search-inp').value = name.split(',')[0];
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('search-box').contains(e.target)) {
+    document.getElementById('search-results').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
